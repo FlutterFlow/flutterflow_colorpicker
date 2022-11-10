@@ -8,9 +8,8 @@ HSV(HSB)/HSL/RGB/Material color picker built on top of [flutter_colorpicker](htt
 ## Getting Started
 
 ```dart
-Color pickedColor = Color(0xff443a49);
+Color pickedColor = Color(0xFF000000);
 
-// raise the [showDialog] widget
 final colorPickerResult = await showFFColorPicker(
   context,
   currentColor: pickedColor,
