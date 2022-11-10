@@ -14,6 +14,20 @@ const Map<ColorLabelType, List<String>> _colorTypes = {
   ColorLabelType.hsl: ['H', 'S', 'L', 'A'],
 };
 
+Future<Color?> showFFColorPicker(
+  BuildContext context, {
+  Color? currentColor,
+  bool showRecentColors = false,
+}) {
+  return showDialog<Color?>(
+    context: context,
+    builder: (_) => FFColorPickerDialog(
+      currentColor: currentColor,
+      showRecentColors: true,
+    ),
+  );
+}
+
 class FFColorPickerDialog extends StatefulWidget {
   const FFColorPickerDialog({
     Key? key,
