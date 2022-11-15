@@ -8,6 +8,7 @@ import 'utils.dart';
 
 const _kRecentColorsKey = '__ff_recent_colors__';
 
+const _alphaValueIndex = 3;
 const Map<ColorLabelType, List<String>> _colorTypes = {
   ColorLabelType.rgb: ['R', 'G', 'B', 'A'],
   ColorLabelType.hsv: ['H', 'S', 'V', 'A'],
@@ -18,12 +19,14 @@ Future<Color?> showFFColorPicker(
   BuildContext context, {
   Color? currentColor,
   bool showRecentColors = false,
+  bool allowOpacity = true,
 }) {
   return showDialog<Color?>(
     context: context,
     builder: (_) => FFColorPickerDialog(
       currentColor: currentColor,
-      showRecentColors: true,
+      showRecentColors: showRecentColors,
+      allowOpacity: allowOpacity,
     ),
   );
 }
@@ -33,11 +36,13 @@ class FFColorPickerDialog extends StatefulWidget {
     Key? key,
     this.currentColor,
     this.showRecentColors = false,
+    this.allowOpacity = true,
     this.darkMode = true,
   }) : super(key: key);
 
   final Color? currentColor;
   final bool showRecentColors;
+  final bool allowOpacity;
   final bool darkMode;
 
   @override
@@ -171,16 +176,18 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                                 onColorChanged(color.toColor()),
                                           ),
                                         ),
-                                        const SizedBox(height: 15.0),
-                                        SizedBox(
-                                          height: 21.0,
-                                          child: ColorPickerSlider(
-                                            TrackType.alpha,
-                                            currentHsvColor,
-                                            (color) =>
-                                                onColorChanged(color.toColor()),
+                                        if (widget.allowOpacity) ...[
+                                          const SizedBox(height: 15.0),
+                                          SizedBox(
+                                            height: 21.0,
+                                            child: ColorPickerSlider(
+                                              TrackType.alpha,
+                                              currentHsvColor,
+                                              (color) => onColorChanged(
+                                                  color.toColor()),
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                         const SizedBox(height: 12.0),
                                         Row(
                                           crossAxisAlignment:
@@ -255,8 +262,9 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                             ),
                                             const SizedBox(width: 12.0),
                                             ..._colorValueLabels(
-                                                    currentHsvColor)
-                                                .map(
+                                              currentHsvColor,
+                                              widget.allowOpacity,
+                                            ).map(
                                               (w) => Padding(
                                                 padding: const EdgeInsets.only(
                                                     top: 5.0),
@@ -415,44 +423,50 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
     );
   }
 
-  List<Widget> _colorValueLabels(HSVColor hsvColor) => _colorTypes[colorType!]!
-      .map(
-        (item) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 24.0),
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    item,
-                    style: const TextStyle(
-                      fontFamily: 'Open Sans',
-                      fontSize: 12,
-                      color: Color(0xFF95A1AC),
-                    ),
-                  ),
-                  const SizedBox(height: 19.0),
-                  Expanded(
-                    child: Text(
-                      _colorValue(hsvColor, colorType)[
-                          _colorTypes[colorType!]!.indexOf(item)],
-                      overflow: TextOverflow.ellipsis,
+  List<Widget> _colorValueLabels(HSVColor hsvColor, bool allowOpacity) {
+    final colorTypes = allowOpacity
+        ? _colorTypes[colorType!]
+        : _colorTypes[colorType!]!.sublist(0, _alphaValueIndex);
+
+    return colorTypes!
+        .map(
+          (item) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 24.0),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      item,
                       style: const TextStyle(
                         fontFamily: 'Open Sans',
-                        fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        color: Colors.white,
+                        color: Color(0xFF95A1AC),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 19.0),
+                    Expanded(
+                      child: Text(
+                        _colorValue(hsvColor, colorType)[
+                            _colorTypes[colorType!]!.indexOf(item)],
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      )
-      .toList();
+        )
+        .toList();
+  }
 }
 
 List<String> _colorValue(HSVColor hsvColor, ColorLabelType? colorLabelType) {
