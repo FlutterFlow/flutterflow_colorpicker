@@ -98,7 +98,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Choose a Color',
+                        'Select Color',
                         style: TextStyle(
                           fontFamily: 'Open Sans',
                           fontWeight: FontWeight.bold,
@@ -397,7 +397,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                       MaterialStateProperty.all<double>(2.0),
                                 ),
                                 child: const Text(
-                                  'Use Color',
+                                  'Save',
                                   style: TextStyle(
                                     fontFamily: 'Open Sans',
                                     fontWeight: FontWeight.bold,
