@@ -20,6 +20,12 @@ Future<Color?> showFFColorPicker(
   Color? currentColor,
   bool showRecentColors = false,
   bool allowOpacity = true,
+  Color? textColor,
+  Color? secondaryTextColor,
+  Color? backgroundColor,
+  Color? primaryButtonBackgroundColor,
+  Color? primaryButtonTextColor,
+  Color? primaryButtonBorderColor,
 }) {
   return showDialog<Color?>(
     context: context,
@@ -27,6 +33,13 @@ Future<Color?> showFFColorPicker(
       currentColor: currentColor,
       showRecentColors: showRecentColors,
       allowOpacity: allowOpacity,
+      textColor: textColor ?? Colors.white,
+      secondaryTextColor: secondaryTextColor ?? const Color(0xFF95A1AC),
+      backgroundColor: backgroundColor ?? const Color(0xFF14181B),
+      primaryButtonBackgroundColor:
+          primaryButtonBackgroundColor ?? const Color(0xFF4542e6),
+      primaryButtonTextColor: primaryButtonTextColor ?? Colors.white,
+      primaryButtonBorderColor: primaryButtonBorderColor ?? Colors.transparent,
     ),
   );
 }
@@ -38,12 +51,24 @@ class FFColorPickerDialog extends StatefulWidget {
     this.showRecentColors = false,
     this.allowOpacity = true,
     this.darkMode = true,
+    this.textColor = Colors.white,
+    this.secondaryTextColor = const Color(0xFF95A1AC),
+    this.backgroundColor = const Color(0xFF14181B),
+    this.primaryButtonBackgroundColor = const Color(0xFF4542e6),
+    this.primaryButtonTextColor = Colors.white,
+    this.primaryButtonBorderColor = Colors.transparent,
   }) : super(key: key);
 
   final Color? currentColor;
   final bool showRecentColors;
   final bool allowOpacity;
   final bool darkMode;
+  final Color textColor;
+  final Color secondaryTextColor;
+  final Color backgroundColor;
+  final Color primaryButtonBackgroundColor;
+  final Color primaryButtonTextColor;
+  final Color primaryButtonBorderColor;
 
   @override
   _FFColorPickerDialogState createState() => _FFColorPickerDialogState();
@@ -63,9 +88,10 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
     }
   }
 
+  late SharedPreferences _prefs;
   Future _initRecentColors() async {
-    final prefs = await SharedPreferences.getInstance();
-    final strColors = prefs.getStringList(_kRecentColorsKey) ?? [];
+    _prefs = await SharedPreferences.getInstance();
+    final strColors = _prefs.getStringList(_kRecentColorsKey) ?? [];
     if (strColors.isEmpty) {
       return;
     }
@@ -75,10 +101,18 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
     );
   }
 
+  void _addRecentColor(Color color) {
+    final currentColors = _prefs.getStringList(_kRecentColorsKey) ?? [];
+    final newColor = color.value.toInt().toRadixString(16);
+    if (currentColors.contains(newColor)) {
+      return;
+    }
+    _prefs.setStringList(_kRecentColorsKey, currentColors + [newColor]);
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: Adjust the size of the dialog for mobile vs web.
-    // TODO: Create a light mode and a dark mode version.
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
       child: AlertDialog(
@@ -89,7 +123,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
           borderRadius: BorderRadius.circular(8),
           child: Container(
             width: 610,
-            color: const Color(0xFF14181B),
+            color: widget.backgroundColor,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
               child: Column(
@@ -97,22 +131,22 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Select Color',
                         style: TextStyle(
                           fontFamily: 'Open Sans',
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
-                          color: Colors.white,
+                          color: widget.textColor,
                         ),
                       ),
                       InkWell(
                         onTap: () =>
                             Navigator.of(context, rootNavigator: true).pop(),
-                        child: const Icon(
+                        child: Icon(
                           Icons.clear,
                           size: 20.0,
-                          color: Color(0xFF95A1AC),
+                          color: widget.secondaryTextColor,
                         ),
                       ),
                     ],
@@ -153,7 +187,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                   decoration: BoxDecoration(
                                     color: selectedColor,
                                     border: Border.all(
-                                      color: Colors.white,
+                                      color: widget.textColor,
                                       width: 1.0,
                                     ),
                                     borderRadius: BorderRadius.circular(4.0),
@@ -207,15 +241,16 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                                     focusColor:
                                                         Colors.transparent,
                                                     underline: Container(),
-                                                    icon: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 8.0),
+                                                    icon: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 8.0),
                                                       child: Icon(
                                                         Icons
                                                             .keyboard_arrow_down,
                                                         size: 18.0,
-                                                        color:
-                                                            Color(0xFF95A1AC),
+                                                        color: widget
+                                                            .secondaryTextColor,
                                                       ),
                                                     ),
                                                     items: _colorTypes.keys
@@ -229,13 +264,12 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                                                   .split('.')
                                                                   .last
                                                                   .toUpperCase(),
-                                                              style:
-                                                                  const TextStyle(
+                                                              style: TextStyle(
                                                                 fontFamily:
                                                                     'Open Sans',
                                                                 fontSize: 12,
-                                                                color: Color(
-                                                                    0xFF95A1AC),
+                                                                color: widget
+                                                                    .secondaryTextColor,
                                                               ),
                                                             ),
                                                           ),
@@ -251,8 +285,8 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                                   (color) =>
                                                       onColorChanged(color),
                                                   embeddedText: false,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
+                                                  style: TextStyle(
+                                                    color: widget.textColor,
                                                     fontFamily: 'Open Sans',
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 12,
@@ -264,6 +298,8 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                             ..._colorValueLabels(
                                               currentHsvColor,
                                               widget.allowOpacity,
+                                              widget.textColor,
+                                              widget.secondaryTextColor,
                                             ).map(
                                               (w) => Padding(
                                                 padding: const EdgeInsets.only(
@@ -283,10 +319,10 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                         ),
                         if (recentColors.isNotEmpty) ...[
                           const SizedBox(height: 16.0),
-                          const Text(
+                          Text(
                             "Recent Colors",
                             style: TextStyle(
-                              color: Color(0xFF95A1AC),
+                              color: widget.secondaryTextColor,
                               fontFamily: 'Open Sans',
                               fontSize: 12,
                             ),
@@ -340,7 +376,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                   ),
                                   backgroundColor:
                                       MaterialStateProperty.all<Color>(
-                                    const Color(0xFF323B45),
+                                    widget.backgroundColor,
                                   ),
                                   padding: MaterialStateProperty.all(
                                     const EdgeInsets.symmetric(
@@ -351,13 +387,13 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                   elevation:
                                       MaterialStateProperty.all<double>(2.0),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Cancel',
                                   style: TextStyle(
                                     fontFamily: 'Open Sans',
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Colors.white,
+                                    color: widget.textColor,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -369,23 +405,30 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                               height: 40.0,
                               width: 103.0,
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop(selectedColor),
+                                onPressed: () {
+                                  if (widget.showRecentColors) {
+                                    _addRecentColor(selectedColor);
+                                  }
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop(selectedColor);
+                                },
                                 style: ButtonStyle(
                                   shape:
                                       MaterialStateProperty.all<OutlinedBorder>(
                                     RoundedRectangleBorder(
+                                      side: BorderSide(
+                                        color: widget.primaryButtonBorderColor,
+                                      ),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
                                   foregroundColor:
                                       MaterialStateProperty.all<Color>(
-                                    Colors.white,
+                                    widget.primaryButtonTextColor,
                                   ),
                                   backgroundColor:
                                       MaterialStateProperty.all<Color>(
-                                    const Color(0xFF4542e6),
+                                    widget.primaryButtonBackgroundColor,
                                   ),
                                   padding: MaterialStateProperty.all(
                                     const EdgeInsets.symmetric(
@@ -396,13 +439,13 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                   elevation:
                                       MaterialStateProperty.all<double>(2.0),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Save',
                                   style: TextStyle(
                                     fontFamily: 'Open Sans',
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Colors.white,
+                                    color: widget.primaryButtonTextColor,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -423,7 +466,12 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
     );
   }
 
-  List<Widget> _colorValueLabels(HSVColor hsvColor, bool allowOpacity) {
+  List<Widget> _colorValueLabels(
+    HSVColor hsvColor,
+    bool allowOpacity,
+    Color textColor,
+    Color secondaryTextColor,
+  ) {
     final colorTypes = allowOpacity
         ? _colorTypes[colorType!]
         : _colorTypes[colorType!]!.sublist(0, _alphaValueIndex);
@@ -439,10 +487,10 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                   children: <Widget>[
                     Text(
                       item,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Open Sans',
                         fontSize: 12,
-                        color: Color(0xFF95A1AC),
+                        color: secondaryTextColor,
                       ),
                     ),
                     const SizedBox(height: 19.0),
@@ -451,11 +499,11 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                         _colorValue(hsvColor, colorType)[
                             _colorTypes[colorType!]!.indexOf(item)],
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Open Sans',
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
-                          color: Colors.white,
+                          color: textColor,
                         ),
                       ),
                     ),
