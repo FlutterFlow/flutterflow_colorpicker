@@ -28,27 +28,26 @@ Future<Color?> showFFColorPicker(
   Color? primaryButtonTextColor,
   Color? primaryButtonBorderColor,
 }) {
+  final colorPicker = FFColorPickerDialog(
+    currentColor: currentColor,
+    showRecentColors: showRecentColors,
+    allowOpacity: allowOpacity,
+    textColor: textColor ?? Colors.white,
+    secondaryTextColor: secondaryTextColor ?? const Color(0xFF95A1AC),
+    backgroundColor: backgroundColor ?? const Color(0xFF14181B),
+    primaryButtonBackgroundColor:
+        primaryButtonBackgroundColor ?? const Color(0xFF4542e6),
+    primaryButtonTextColor: primaryButtonTextColor ?? Colors.white,
+    primaryButtonBorderColor: primaryButtonBorderColor ?? Colors.transparent,
+    displayAsBottomSheet: displayAsBottomSheet,
+  );
+
   if (displayAsBottomSheet) {
     return showModalBottomSheet<Color?>(
       context: context,
       builder: (context) => Wrap(
         alignment: WrapAlignment.spaceAround,
-        children: [
-          FFColorPickerDialog(
-            currentColor: currentColor,
-            showRecentColors: showRecentColors,
-            allowOpacity: allowOpacity,
-            textColor: textColor ?? Colors.white,
-            secondaryTextColor: secondaryTextColor ?? const Color(0xFF95A1AC),
-            backgroundColor: backgroundColor ?? const Color(0xFF14181B),
-            primaryButtonBackgroundColor:
-                primaryButtonBackgroundColor ?? const Color(0xFF4542e6),
-            primaryButtonTextColor: primaryButtonTextColor ?? Colors.white,
-            primaryButtonBorderColor:
-                primaryButtonBorderColor ?? Colors.transparent,
-            displayAsBottomSheet: displayAsBottomSheet,
-          ),
-        ],
+        children: [colorPicker],
       ),
       isScrollControlled: true,
       constraints: const BoxConstraints(maxWidth: 394),
@@ -66,20 +65,7 @@ Future<Color?> showFFColorPicker(
         backgroundColor: Colors.transparent,
         contentPadding: EdgeInsets.zero,
         scrollable: true,
-        content: FFColorPickerDialog(
-          currentColor: currentColor,
-          showRecentColors: showRecentColors,
-          allowOpacity: allowOpacity,
-          textColor: textColor ?? Colors.white,
-          secondaryTextColor: secondaryTextColor ?? const Color(0xFF95A1AC),
-          backgroundColor: backgroundColor ?? const Color(0xFF14181B),
-          primaryButtonBackgroundColor:
-              primaryButtonBackgroundColor ?? const Color(0xFF4542e6),
-          primaryButtonTextColor: primaryButtonTextColor ?? Colors.white,
-          primaryButtonBorderColor:
-              primaryButtonBorderColor ?? Colors.transparent,
-          displayAsBottomSheet: displayAsBottomSheet,
-        ),
+        content: colorPicker,
       ),
     ),
   );
@@ -411,7 +397,9 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                               if (widget.showRecentColors) {
                                 _addRecentColor(selectedColor);
                               }
-                              Navigator.of(context).pop(selectedColor);
+                              Navigator.of(context).pop(widget.allowOpacity
+                                  ? selectedColor
+                                  : selectedColor.withOpacity(1.0));
                             },
                             style: ButtonStyle(
                               shape: MaterialStateProperty.all<OutlinedBorder>(
