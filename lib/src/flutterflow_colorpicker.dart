@@ -8,6 +8,7 @@ import 'utils.dart';
 
 const _kRecentColorsKey = '__ff_recent_colors__';
 
+const _alphaValueIndex = 3;
 const Map<ColorLabelType, List<String>> _colorTypes = {
   ColorLabelType.rgb: ['R', 'G', 'B', 'A'],
   ColorLabelType.hsv: ['H', 'S', 'V', 'A'],
@@ -18,12 +19,54 @@ Future<Color?> showFFColorPicker(
   BuildContext context, {
   Color? currentColor,
   bool showRecentColors = false,
+  bool allowOpacity = true,
+  required bool displayAsBottomSheet,
+  Color? textColor,
+  Color? secondaryTextColor,
+  Color? backgroundColor,
+  Color? primaryButtonBackgroundColor,
+  Color? primaryButtonTextColor,
+  Color? primaryButtonBorderColor,
 }) {
+  final colorPicker = FFColorPickerDialog(
+    currentColor: currentColor,
+    showRecentColors: showRecentColors,
+    allowOpacity: allowOpacity,
+    textColor: textColor ?? Colors.white,
+    secondaryTextColor: secondaryTextColor ?? const Color(0xFF95A1AC),
+    backgroundColor: backgroundColor ?? const Color(0xFF14181B),
+    primaryButtonBackgroundColor:
+        primaryButtonBackgroundColor ?? const Color(0xFF4542e6),
+    primaryButtonTextColor: primaryButtonTextColor ?? Colors.white,
+    primaryButtonBorderColor: primaryButtonBorderColor ?? Colors.transparent,
+    displayAsBottomSheet: displayAsBottomSheet,
+  );
+
+  if (displayAsBottomSheet) {
+    return showModalBottomSheet<Color?>(
+      context: context,
+      builder: (context) => Wrap(
+        alignment: WrapAlignment.spaceAround,
+        children: [colorPicker],
+      ),
+      isScrollControlled: true,
+      constraints: const BoxConstraints(maxWidth: 394),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+
   return showDialog<Color?>(
     context: context,
-    builder: (_) => FFColorPickerDialog(
-      currentColor: currentColor,
-      showRecentColors: true,
+    builder: (_) => BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+      child: AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        scrollable: true,
+        content: colorPicker,
+      ),
     ),
   );
 }
@@ -33,12 +76,26 @@ class FFColorPickerDialog extends StatefulWidget {
     Key? key,
     this.currentColor,
     this.showRecentColors = false,
-    this.darkMode = true,
+    this.allowOpacity = true,
+    required this.displayAsBottomSheet,
+    this.textColor = Colors.white,
+    this.secondaryTextColor = const Color(0xFF95A1AC),
+    this.backgroundColor = const Color(0xFF14181B),
+    this.primaryButtonBackgroundColor = const Color(0xFF4542e6),
+    this.primaryButtonTextColor = Colors.white,
+    this.primaryButtonBorderColor = Colors.transparent,
   }) : super(key: key);
 
   final Color? currentColor;
   final bool showRecentColors;
-  final bool darkMode;
+  final bool allowOpacity;
+  final bool displayAsBottomSheet;
+  final Color textColor;
+  final Color secondaryTextColor;
+  final Color backgroundColor;
+  final Color primaryButtonBackgroundColor;
+  final Color primaryButtonTextColor;
+  final Color primaryButtonBorderColor;
 
   @override
   _FFColorPickerDialogState createState() => _FFColorPickerDialogState();
@@ -58,9 +115,10 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
     }
   }
 
+  late SharedPreferences _prefs;
   Future _initRecentColors() async {
-    final prefs = await SharedPreferences.getInstance();
-    final strColors = prefs.getStringList(_kRecentColorsKey) ?? [];
+    _prefs = await SharedPreferences.getInstance();
+    final strColors = _prefs.getStringList(_kRecentColorsKey) ?? [];
     if (strColors.isEmpty) {
       return;
     }
@@ -70,389 +128,375 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
     );
   }
 
+  void _addRecentColor(Color color) {
+    final currentColors = _prefs.getStringList(_kRecentColorsKey) ?? [];
+    final newColor = color.value.toInt().toRadixString(16);
+    if (currentColors.contains(newColor)) {
+      return;
+    }
+    _prefs.setStringList(_kRecentColorsKey, currentColors + [newColor]);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO: Adjust the size of the dialog for mobile vs web.
-    // TODO: Create a light mode and a dark mode version.
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-      child: AlertDialog(
-        backgroundColor: Colors.transparent,
-        contentPadding: EdgeInsets.zero,
-        scrollable: true,
-        content: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            width: 610,
-            color: const Color(0xFF14181B),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
-              child: Column(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 394,
+        color: widget.backgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Choose a Color',
-                        style: TextStyle(
-                          fontFamily: 'Open Sans',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () =>
-                            Navigator.of(context, rootNavigator: true).pop(),
-                        child: const Icon(
-                          Icons.clear,
-                          size: 20.0,
-                          color: Color(0xFF95A1AC),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Select Color',
+                    style: TextStyle(
+                      fontFamily: 'Open Sans',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                      color: widget.textColor,
+                    ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(6, 0, 0, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 10.0),
-                        Builder(
-                          builder: (context) {
-                            final currentHsvColor =
-                                HSVColor.fromColor(selectedColor);
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(6, 0, 0, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10.0),
+                    Builder(
+                      builder: (context) {
+                        final currentHsvColor =
+                            HSVColor.fromColor(selectedColor);
 
-                            onColorChanged(val) =>
-                                setState(() => selectedColor = val);
+                        onColorChanged(val) =>
+                            setState(() => selectedColor = val);
 
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                  child: SizedBox(
-                                    width: 220,
-                                    height: 136,
-                                    child: ColorPickerArea(
-                                      currentHsvColor,
-                                      (val) => onColorChanged(val.toColor()),
-                                      PaletteType.hsvWithHue,
-                                    ),
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4.0),
+                                child: SizedBox(
+                                  width: 220,
+                                  height: 136,
+                                  child: ColorPickerArea(
+                                    currentHsvColor,
+                                    (val) => onColorChanged(val.toColor()),
+                                    PaletteType.hsvWithHue,
                                   ),
                                 ),
-                                const SizedBox(width: 15.0),
-                                Container(
-                                  width: 40.0,
-                                  height: 40.0,
-                                  decoration: BoxDecoration(
-                                    color: selectedColor,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(4.0),
-                                  ),
+                              ),
+                              const SizedBox(height: 11.0),
+                              SizedBox(
+                                height: 20.0,
+                                child: ColorPickerSlider(
+                                  TrackType.hue,
+                                  currentHsvColor,
+                                  (color) => onColorChanged(color.toColor()),
                                 ),
-                                const SizedBox(width: 3.0),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 6.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 20.0,
-                                          child: ColorPickerSlider(
-                                            TrackType.hue,
-                                            currentHsvColor,
-                                            (color) =>
-                                                onColorChanged(color.toColor()),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 15.0),
-                                        SizedBox(
-                                          height: 21.0,
-                                          child: ColorPickerSlider(
-                                            TrackType.alpha,
-                                            currentHsvColor,
-                                            (color) =>
-                                                onColorChanged(color.toColor()),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12.0),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(width: 15.0),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  height: 24.0,
-                                                  child: DropdownButton<
-                                                      ColorLabelType>(
-                                                    value: colorType,
-                                                    dropdownColor: Colors.black,
-                                                    focusColor:
-                                                        Colors.transparent,
-                                                    underline: Container(),
-                                                    icon: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 8.0),
-                                                      child: Icon(
-                                                        Icons
-                                                            .keyboard_arrow_down,
-                                                        size: 18.0,
-                                                        color:
-                                                            Color(0xFF95A1AC),
-                                                      ),
-                                                    ),
-                                                    items: _colorTypes.keys
-                                                        .map(
-                                                          (type) =>
-                                                              DropdownMenuItem(
-                                                            value: type,
-                                                            child: Text(
-                                                              type
-                                                                  .toString()
-                                                                  .split('.')
-                                                                  .last
-                                                                  .toUpperCase(),
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontFamily:
-                                                                    'Open Sans',
-                                                                fontSize: 12,
-                                                                color: Color(
-                                                                    0xFF95A1AC),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        )
-                                                        .toList(),
-                                                    onChanged: (type) =>
-                                                        setState(() =>
-                                                            colorType = type),
-                                                  ),
-                                                ),
-                                                ColorPickerInput(
-                                                  currentHsvColor.toColor(),
-                                                  (color) =>
-                                                      onColorChanged(color),
-                                                  embeddedText: false,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontFamily: 'Open Sans',
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(width: 12.0),
-                                            ..._colorValueLabels(
-                                                    currentHsvColor)
-                                                .map(
-                                              (w) => Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 5.0),
-                                                child: w,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
+                              ),
+                              if (widget.allowOpacity) ...[
+                                const SizedBox(height: 15.0),
+                                SizedBox(
+                                  height: 21.0,
+                                  child: ColorPickerSlider(
+                                    TrackType.alpha,
+                                    currentHsvColor,
+                                    (color) => onColorChanged(color.toColor()),
                                   ),
                                 ),
                               ],
-                            );
-                          },
-                        ),
-                        if (recentColors.isNotEmpty) ...[
-                          const SizedBox(height: 16.0),
-                          const Text(
-                            "Recent Colors",
-                            style: TextStyle(
-                              color: Color(0xFF95A1AC),
-                              fontFamily: 'Open Sans',
-                              fontSize: 12,
-                            ),
+                              const SizedBox(height: 12.0),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: 24.0,
+                                        child: DropdownButton<ColorLabelType>(
+                                          value: colorType,
+                                          dropdownColor: Colors.black,
+                                          focusColor: Colors.transparent,
+                                          underline: Container(),
+                                          icon: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8.0),
+                                            child: Icon(
+                                              Icons.keyboard_arrow_down,
+                                              size: 18.0,
+                                              color: widget.secondaryTextColor,
+                                            ),
+                                          ),
+                                          items: _colorTypes.keys
+                                              .map(
+                                                (type) => DropdownMenuItem(
+                                                  value: type,
+                                                  child: Text(
+                                                    type
+                                                        .toString()
+                                                        .split('.')
+                                                        .last
+                                                        .toUpperCase(),
+                                                    style: TextStyle(
+                                                      fontFamily: 'Open Sans',
+                                                      fontSize: 10,
+                                                      color: widget
+                                                          .secondaryTextColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                          onChanged: (type) =>
+                                              setState(() => colorType = type),
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          ColorPickerInput(
+                                            currentHsvColor.toColor(),
+                                            (color) => onColorChanged(color),
+                                            showColor: true,
+                                            style: TextStyle(
+                                              color: widget.textColor,
+                                              fontFamily: 'Open Sans',
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 12.0),
+                                  ..._colorValueLabels(
+                                    currentHsvColor,
+                                    widget.allowOpacity,
+                                    widget.textColor,
+                                    widget.secondaryTextColor,
+                                  ).map(
+                                    (w) => Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: w,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            children: recentColors.reversed
-                                .take(15)
-                                .map<Widget>(
-                                  (c) => InkWell(
+                        );
+                      },
+                    ),
+                    if (recentColors.isNotEmpty) ...[
+                      const SizedBox(height: 16.0),
+                      Text(
+                        "Recent Colors",
+                        style: TextStyle(
+                          color: widget.secondaryTextColor,
+                          fontFamily: 'Open Sans',
+                          fontSize: 10,
+                        ),
+                      ),
+                      const SizedBox(height: 7.0),
+                      ...[
+                        recentColors.reversed.take(7).toList(),
+                        if (recentColors.length > 7) ...[
+                          recentColors.reversed
+                              .toList()
+                              .sublist(7)
+                              .take(7)
+                              .toList()
+                        ]
+                      ]
+                          .map<Widget>(
+                            (recentColorsRow) => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: recentColorsRow.map<Widget>((c) {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5.0),
+                                  child: InkWell(
                                     onTap: () =>
                                         setState(() => selectedColor = c),
                                     child: Container(
-                                      width: 24,
-                                      height: 24,
+                                      width: 40.0,
+                                      height: 34.0,
                                       decoration: BoxDecoration(
                                         color: c,
                                         borderRadius:
-                                            BorderRadius.circular(5.0),
+                                            BorderRadius.circular(8.0),
                                         border: Border.all(
                                           color: Colors.white.withOpacity(0.5),
                                         ),
                                       ),
                                     ),
                                   ),
-                                )
-                                .toList(),
+                                );
+                              }).toList(),
+                            ),
+                          )
+                          .toList(),
+                    ],
+                    const SizedBox(height: 12.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          height: 40.0,
+                          width: 96.0,
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                widget.textColor,
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                widget.backgroundColor,
+                              ),
+                              padding: MaterialStateProperty.all(
+                                const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 4.0,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: widget.textColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ],
-                        const SizedBox(height: 24.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            SizedBox(
-                              height: 40.0,
-                              width: 115.0,
-                              child: ElevatedButton(
-                                onPressed: () =>
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop(),
-                                style: ButtonStyle(
-                                  shape:
-                                      MaterialStateProperty.all<OutlinedBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                        ),
+                        const SizedBox(width: 20.0),
+                        SizedBox(
+                          height: 40.0,
+                          width: 84.0,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              if (widget.showRecentColors) {
+                                _addRecentColor(selectedColor);
+                              }
+                              Navigator.of(context).pop(widget.allowOpacity
+                                  ? selectedColor
+                                  : selectedColor.withOpacity(1.0));
+                            },
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  side: BorderSide(
+                                    color: widget.primaryButtonBorderColor,
                                   ),
-                                  foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Colors.white,
-                                  ),
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    const Color(0xFF323B45),
-                                  ),
-                                  padding: MaterialStateProperty.all(
-                                    const EdgeInsets.symmetric(
-                                      horizontal: 12.0,
-                                      vertical: 4.0,
-                                    ),
-                                  ),
-                                  elevation:
-                                      MaterialStateProperty.all<double>(2.0),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    fontFamily: 'Open Sans',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              ),
+                              foregroundColor: MaterialStateProperty.all<Color>(
+                                widget.primaryButtonTextColor,
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                widget.primaryButtonBackgroundColor,
+                              ),
+                              padding: MaterialStateProperty.all(
+                                const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 4.0,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 20.0),
-                            SizedBox(
-                              height: 40.0,
-                              width: 103.0,
-                              child: ElevatedButton(
-                                onPressed: () =>
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop(selectedColor),
-                                style: ButtonStyle(
-                                  shape:
-                                      MaterialStateProperty.all<OutlinedBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Colors.white,
-                                  ),
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    const Color(0xFF4542e6),
-                                  ),
-                                  padding: MaterialStateProperty.all(
-                                    const EdgeInsets.symmetric(
-                                      horizontal: 12.0,
-                                      vertical: 4.0,
-                                    ),
-                                  ),
-                                  elevation:
-                                      MaterialStateProperty.all<double>(2.0),
-                                ),
-                                child: const Text(
-                                  'Use Color',
-                                  style: TextStyle(
-                                    fontFamily: 'Open Sans',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                            child: Text(
+                              'Save',
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: widget.primaryButtonTextColor,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  List<Widget> _colorValueLabels(HSVColor hsvColor) => _colorTypes[colorType!]!
-      .map(
-        (item) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 24.0),
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    item,
-                    style: const TextStyle(
-                      fontFamily: 'Open Sans',
-                      fontSize: 12,
-                      color: Color(0xFF95A1AC),
-                    ),
-                  ),
-                  const SizedBox(height: 19.0),
-                  Expanded(
-                    child: Text(
-                      _colorValue(hsvColor, colorType)[
-                          _colorTypes[colorType!]!.indexOf(item)],
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+  List<Widget> _colorValueLabels(
+    HSVColor hsvColor,
+    bool allowOpacity,
+    Color textColor,
+    Color secondaryTextColor,
+  ) {
+    final colorTypes = allowOpacity
+        ? _colorTypes[colorType!]
+        : _colorTypes[colorType!]!.sublist(0, _alphaValueIndex);
+
+    return colorTypes!
+        .map(
+          (item) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 24.0),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      item,
+                      style: TextStyle(
                         fontFamily: 'Open Sans',
-                        fontWeight: FontWeight.bold,
                         fontSize: 12,
-                        color: Colors.white,
+                        color: secondaryTextColor,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 19.0),
+                    Expanded(
+                      child: Text(
+                        _colorValue(hsvColor, colorType)[
+                            _colorTypes[colorType!]!.indexOf(item)],
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Open Sans',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      )
-      .toList();
+        )
+        .toList();
+  }
 }
 
 List<String> _colorValue(HSVColor hsvColor, ColorLabelType? colorLabelType) {
