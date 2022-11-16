@@ -833,14 +833,13 @@ class IndicatorPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-/// Provide hex input wiget for 3/6/8 digits.
+/// Provide hex input widget for 3/6/8 digits.
 class ColorPickerInput extends StatefulWidget {
   const ColorPickerInput(
     this.color,
     this.onColorChanged, {
     Key? key,
-    this.enableAlpha = true,
-    this.embeddedText = false,
+    this.showColor = false,
     this.disable = false,
     this.style = const TextStyle(
       color: Colors.white,
@@ -852,9 +851,8 @@ class ColorPickerInput extends StatefulWidget {
 
   final Color color;
   final ValueChanged<Color> onColorChanged;
-  final bool enableAlpha;
-  final bool embeddedText;
   final bool disable;
+  final bool showColor;
   final TextStyle style;
 
   @override
@@ -885,31 +883,48 @@ class _ColorPickerInputState extends State<ColorPickerInput> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            height: 34.0,
-            width: 102.0,
+            height: 32.0,
+            width: 168.0,
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFF262D34)),
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: TextField(
-              enabled: !widget.disable,
-              controller: textEditingController,
-              inputFormatters: [
-                UpperCaseTextFormatter(),
-                FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
+            child: Row(
+              children: [
+                TextField(
+                  enabled: !widget.disable,
+                  controller: textEditingController,
+                  inputFormatters: [
+                    UpperCaseTextFormatter(),
+                    FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
+                  ],
+                  decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 5.0, 18.0),
+                      constraints: BoxConstraints(maxWidth: 100.0)),
+                  style: widget.style,
+                  onChanged: (value) {
+                    final Color? color = colorFromHex(value);
+                    if (color != null) {
+                      widget.onColorChanged(color);
+                      inputColor = color.value;
+                    }
+                  },
+                ),
+                const SizedBox(width: 30.0),
+                Container(
+                  width: 20.0,
+                  height: 20.0,
+                  decoration: BoxDecoration(
+                    color: widget.color,
+                    border: Border.all(
+                      width: 1.0,
+                      color: const Color(0xFF323B45),
+                    ),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
               ],
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 5.0, 14.0),
-              ),
-              style: widget.style,
-              onChanged: (value) {
-                final Color? color = colorFromHex(value);
-                if (color != null) {
-                  widget.onColorChanged(color);
-                  inputColor = color.value;
-                }
-              },
             ),
           ),
         ],

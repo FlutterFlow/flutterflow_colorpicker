@@ -122,7 +122,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
         content: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            width: 610,
+            width: 394,
             color: widget.backgroundColor,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
@@ -138,15 +138,6 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                           fontWeight: FontWeight.bold,
                           fontSize: 16.0,
                           color: widget.textColor,
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () =>
-                            Navigator.of(context, rootNavigator: true).pop(),
-                        child: Icon(
-                          Icons.clear,
-                          size: 20.0,
-                          color: widget.secondaryTextColor,
                         ),
                       ),
                     ],
@@ -165,155 +156,132 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                             onColorChanged(val) =>
                                 setState(() => selectedColor = val);
 
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                  child: SizedBox(
-                                    width: 220,
-                                    height: 136,
-                                    child: ColorPickerArea(
-                                      currentHsvColor,
-                                      (val) => onColorChanged(val.toColor()),
-                                      PaletteType.hsvWithHue,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 15.0),
-                                Container(
-                                  width: 40.0,
-                                  height: 40.0,
-                                  decoration: BoxDecoration(
-                                    color: selectedColor,
-                                    border: Border.all(
-                                      color: widget.textColor,
-                                      width: 1.0,
-                                    ),
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 6.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  ClipRRect(
                                     borderRadius: BorderRadius.circular(4.0),
+                                    child: SizedBox(
+                                      width: 220,
+                                      height: 136,
+                                      child: ColorPickerArea(
+                                        currentHsvColor,
+                                        (val) => onColorChanged(val.toColor()),
+                                        PaletteType.hsvWithHue,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 3.0),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 6.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 20.0,
-                                          child: ColorPickerSlider(
-                                            TrackType.hue,
-                                            currentHsvColor,
-                                            (color) =>
-                                                onColorChanged(color.toColor()),
-                                          ),
-                                        ),
-                                        if (widget.allowOpacity) ...[
-                                          const SizedBox(height: 15.0),
+                                  const SizedBox(height: 11.0),
+                                  SizedBox(
+                                    height: 20.0,
+                                    child: ColorPickerSlider(
+                                      TrackType.hue,
+                                      currentHsvColor,
+                                      (color) =>
+                                          onColorChanged(color.toColor()),
+                                    ),
+                                  ),
+                                  if (widget.allowOpacity) ...[
+                                    const SizedBox(height: 15.0),
+                                    SizedBox(
+                                      height: 21.0,
+                                      child: ColorPickerSlider(
+                                        TrackType.alpha,
+                                        currentHsvColor,
+                                        (color) =>
+                                            onColorChanged(color.toColor()),
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 12.0),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
                                           SizedBox(
-                                            height: 21.0,
-                                            child: ColorPickerSlider(
-                                              TrackType.alpha,
-                                              currentHsvColor,
-                                              (color) => onColorChanged(
-                                                  color.toColor()),
-                                            ),
-                                          ),
-                                        ],
-                                        const SizedBox(height: 12.0),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const SizedBox(width: 15.0),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  height: 24.0,
-                                                  child: DropdownButton<
-                                                      ColorLabelType>(
-                                                    value: colorType,
-                                                    dropdownColor: Colors.black,
-                                                    focusColor:
-                                                        Colors.transparent,
-                                                    underline: Container(),
-                                                    icon: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 8.0),
-                                                      child: Icon(
-                                                        Icons
-                                                            .keyboard_arrow_down,
-                                                        size: 18.0,
-                                                        color: widget
-                                                            .secondaryTextColor,
+                                            height: 24.0,
+                                            child:
+                                                DropdownButton<ColorLabelType>(
+                                              value: colorType,
+                                              dropdownColor: Colors.black,
+                                              focusColor: Colors.transparent,
+                                              underline: Container(),
+                                              icon: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 8.0),
+                                                child: Icon(
+                                                  Icons.keyboard_arrow_down,
+                                                  size: 18.0,
+                                                  color:
+                                                      widget.secondaryTextColor,
+                                                ),
+                                              ),
+                                              items: _colorTypes.keys
+                                                  .map(
+                                                    (type) => DropdownMenuItem(
+                                                      value: type,
+                                                      child: Text(
+                                                        type
+                                                            .toString()
+                                                            .split('.')
+                                                            .last
+                                                            .toUpperCase(),
+                                                        style: TextStyle(
+                                                          fontFamily:
+                                                              'Open Sans',
+                                                          fontSize: 10,
+                                                          color: widget
+                                                              .secondaryTextColor,
+                                                        ),
                                                       ),
                                                     ),
-                                                    items: _colorTypes.keys
-                                                        .map(
-                                                          (type) =>
-                                                              DropdownMenuItem(
-                                                            value: type,
-                                                            child: Text(
-                                                              type
-                                                                  .toString()
-                                                                  .split('.')
-                                                                  .last
-                                                                  .toUpperCase(),
-                                                              style: TextStyle(
-                                                                fontFamily:
-                                                                    'Open Sans',
-                                                                fontSize: 12,
-                                                                color: widget
-                                                                    .secondaryTextColor,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        )
-                                                        .toList(),
-                                                    onChanged: (type) =>
-                                                        setState(() =>
-                                                            colorType = type),
-                                                  ),
-                                                ),
-                                                ColorPickerInput(
-                                                  currentHsvColor.toColor(),
-                                                  (color) =>
-                                                      onColorChanged(color),
-                                                  embeddedText: false,
-                                                  style: TextStyle(
-                                                    color: widget.textColor,
-                                                    fontFamily: 'Open Sans',
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
+                                                  )
+                                                  .toList(),
+                                              onChanged: (type) => setState(
+                                                  () => colorType = type),
                                             ),
-                                            const SizedBox(width: 12.0),
-                                            ..._colorValueLabels(
-                                              currentHsvColor,
-                                              widget.allowOpacity,
-                                              widget.textColor,
-                                              widget.secondaryTextColor,
-                                            ).map(
-                                              (w) => Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 5.0),
-                                                child: w,
+                                          ),
+                                          Row(
+                                            children: [
+                                              ColorPickerInput(
+                                                currentHsvColor.toColor(),
+                                                (color) =>
+                                                    onColorChanged(color),
+                                                showColor: true,
+                                                style: TextStyle(
+                                                  color: widget.textColor,
+                                                  fontFamily: 'Open Sans',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
                                               ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 12.0),
+                                      ..._colorValueLabels(
+                                        currentHsvColor,
+                                        widget.allowOpacity,
+                                        widget.textColor,
+                                        widget.secondaryTextColor,
+                                      ).map(
+                                        (w) => Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 5.0),
+                                          child: w,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
                             );
                           },
                         ),
@@ -324,33 +292,57 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                             style: TextStyle(
                               color: widget.secondaryTextColor,
                               fontFamily: 'Open Sans',
-                              fontSize: 12,
+                              fontSize: 10,
                             ),
                           ),
-                          const SizedBox(height: 12.0),
-                          Row(
-                            children: recentColors.reversed
-                                .take(15)
-                                .map<Widget>(
-                                  (c) => InkWell(
-                                    onTap: () =>
-                                        setState(() => selectedColor = c),
-                                    child: Container(
-                                      width: 24,
-                                      height: 24,
-                                      decoration: BoxDecoration(
-                                        color: c,
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.5),
+                          const SizedBox(height: 7.0),
+                          ...[
+                            recentColors.reversed.take(7).toList(),
+                            if (recentColors.length > 7) ...[
+                              recentColors.reversed
+                                  .toList()
+                                  .sublist(7)
+                                  .take(7)
+                                  .toList()
+                            ]
+                          ]
+                              .map((e) => List.generate(
+                                  e.length, (index) => [e[index], index]))
+                              .map<Widget>(
+                                (recentColorsRow) => Row(
+                                  children: recentColorsRow.map<Widget>((t) {
+                                    final c = t[0] as Color;
+                                    final idx = t[1] as int;
+                                    final leftPadding =
+                                        idx % 7 == 0 ? 0.0 : 5.0;
+                                    final rightPadding =
+                                        idx % 7 == 6 ? 0.0 : 5.0;
+
+                                    return Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                          leftPadding, 5.0, rightPadding, 5.0),
+                                      child: InkWell(
+                                        onTap: () =>
+                                            setState(() => selectedColor = c),
+                                        child: Container(
+                                          width: 40.0,
+                                          height: 34.0,
+                                          decoration: BoxDecoration(
+                                            color: c,
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            border: Border.all(
+                                              color:
+                                                  Colors.white.withOpacity(0.5),
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
+                                    );
+                                  }).toList(),
+                                ),
+                              )
+                              .toList(),
                         ],
                         const SizedBox(height: 24.0),
                         Row(
@@ -359,7 +351,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                             SizedBox(
                               height: 40.0,
                               width: 115.0,
-                              child: ElevatedButton(
+                              child: OutlinedButton(
                                 onPressed: () =>
                                     Navigator.of(context, rootNavigator: true)
                                         .pop(),
@@ -372,7 +364,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                   ),
                                   foregroundColor:
                                       MaterialStateProperty.all<Color>(
-                                    Colors.white,
+                                    widget.textColor,
                                   ),
                                   backgroundColor:
                                       MaterialStateProperty.all<Color>(
@@ -384,8 +376,6 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                       vertical: 4.0,
                                     ),
                                   ),
-                                  elevation:
-                                      MaterialStateProperty.all<double>(2.0),
                                 ),
                                 child: Text(
                                   'Cancel',
@@ -404,7 +394,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                             SizedBox(
                               height: 40.0,
                               width: 103.0,
-                              child: ElevatedButton(
+                              child: OutlinedButton(
                                 onPressed: () {
                                   if (widget.showRecentColors) {
                                     _addRecentColor(selectedColor);
@@ -436,8 +426,6 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                                       vertical: 4.0,
                                     ),
                                   ),
-                                  elevation:
-                                      MaterialStateProperty.all<double>(2.0),
                                 ),
                                 child: Text(
                                   'Save',
