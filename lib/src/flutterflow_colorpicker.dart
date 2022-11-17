@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'palette.dart';
@@ -15,6 +16,19 @@ const Map<ColorLabelType, List<String>> _colorTypes = {
   ColorLabelType.hsl: ['H', 'S', 'L', 'A'],
 };
 
+class ColorPickerTexts {
+  const ColorPickerTexts({
+    this.selectColor = 'Select Color',
+    this.recentColors = 'Recent Colors',
+    this.cancel = 'Cancel',
+    this.select = 'Select',
+  });
+  final String selectColor;
+  final String recentColors;
+  final String cancel;
+  final String select;
+}
+
 Future<Color?> showFFColorPicker(
   BuildContext context, {
   Color? currentColor,
@@ -27,6 +41,7 @@ Future<Color?> showFFColorPicker(
   Color? primaryButtonBackgroundColor,
   Color? primaryButtonTextColor,
   Color? primaryButtonBorderColor,
+  ColorPickerTexts? colorPickerTexts,
 }) {
   final colorPicker = FFColorPickerDialog(
     currentColor: currentColor,
@@ -40,6 +55,7 @@ Future<Color?> showFFColorPicker(
     primaryButtonTextColor: primaryButtonTextColor ?? Colors.white,
     primaryButtonBorderColor: primaryButtonBorderColor ?? Colors.transparent,
     displayAsBottomSheet: displayAsBottomSheet,
+    colorPickerTexts: colorPickerTexts ?? const ColorPickerTexts(),
   );
 
   if (displayAsBottomSheet) {
@@ -50,9 +66,11 @@ Future<Color?> showFFColorPicker(
         children: [colorPicker],
       ),
       isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 394),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
       ),
     );
   }
@@ -64,7 +82,6 @@ Future<Color?> showFFColorPicker(
       child: AlertDialog(
         backgroundColor: Colors.transparent,
         contentPadding: EdgeInsets.zero,
-        scrollable: true,
         content: colorPicker,
       ),
     ),
@@ -84,6 +101,7 @@ class FFColorPickerDialog extends StatefulWidget {
     this.primaryButtonBackgroundColor = const Color(0xFF4542e6),
     this.primaryButtonTextColor = Colors.white,
     this.primaryButtonBorderColor = Colors.transparent,
+    this.colorPickerTexts = const ColorPickerTexts(),
   }) : super(key: key);
 
   final Color? currentColor;
@@ -96,6 +114,7 @@ class FFColorPickerDialog extends StatefulWidget {
   final Color primaryButtonBackgroundColor;
   final Color primaryButtonTextColor;
   final Color primaryButtonBorderColor;
+  final ColorPickerTexts colorPickerTexts;
 
   @override
   _FFColorPickerDialogState createState() => _FFColorPickerDialogState();
@@ -140,27 +159,28 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: widget.displayAsBottomSheet
+          ? const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+            )
+          : BorderRadius.circular(8),
       child: Container(
-        width: 394,
+        width: widget.displayAsBottomSheet ? null : 394,
         color: widget.backgroundColor,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Select Color',
-                    style: TextStyle(
-                      fontFamily: 'Open Sans',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                      color: widget.textColor,
-                    ),
-                  ),
-                ],
+              Text(
+                widget.colorPickerTexts.selectColor,
+                style: GoogleFonts.openSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                  color: widget.textColor,
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(6, 0, 0, 20),
@@ -217,81 +237,83 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        height: 24.0,
-                                        child: DropdownButton<ColorLabelType>(
-                                          value: colorType,
-                                          dropdownColor: Colors.black,
-                                          focusColor: Colors.transparent,
-                                          underline: Container(),
-                                          icon: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 8.0),
-                                            child: Icon(
-                                              Icons.keyboard_arrow_down,
-                                              size: 18.0,
-                                              color: widget.secondaryTextColor,
+                                  Flexible(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: 24.0,
+                                          child: DropdownButton<ColorLabelType>(
+                                            value: colorType,
+                                            dropdownColor: Colors.black,
+                                            focusColor: Colors.transparent,
+                                            underline: Container(),
+                                            icon: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 8.0),
+                                              child: Icon(
+                                                Icons.keyboard_arrow_down,
+                                                size: 18.0,
+                                                color:
+                                                    widget.secondaryTextColor,
+                                              ),
                                             ),
-                                          ),
-                                          items: _colorTypes.keys
-                                              .map(
-                                                (type) => DropdownMenuItem(
-                                                  value: type,
-                                                  child: Text(
-                                                    type
-                                                        .toString()
-                                                        .split('.')
-                                                        .last
-                                                        .toUpperCase(),
-                                                    style: TextStyle(
-                                                      fontFamily: 'Open Sans',
-                                                      fontSize: 10,
-                                                      color: widget
-                                                          .secondaryTextColor,
+                                            items: _colorTypes.keys
+                                                .map(
+                                                  (type) => DropdownMenuItem(
+                                                    value: type,
+                                                    child: Text(
+                                                      type
+                                                          .toString()
+                                                          .split('.')
+                                                          .last
+                                                          .toUpperCase(),
+                                                      style:
+                                                          GoogleFonts.openSans(
+                                                        fontSize: 10,
+                                                        color: widget
+                                                            .secondaryTextColor,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              )
-                                              .toList(),
-                                          onChanged: (type) =>
-                                              setState(() => colorType = type),
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          ColorPickerInput(
-                                            currentHsvColor.toColor(),
-                                            (color) => onColorChanged(color),
-                                            showColor: true,
-                                            style: TextStyle(
-                                              color: widget.textColor,
-                                              fontFamily: 'Open Sans',
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
+                                                )
+                                                .toList(),
+                                            onChanged: (type) => setState(
+                                                () => colorType = type),
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 12.0),
-                                  ..._colorValueLabels(
-                                    currentHsvColor,
-                                    widget.allowOpacity,
-                                    widget.textColor,
-                                    widget.secondaryTextColor,
-                                  ).map(
-                                    (w) => Padding(
-                                      padding: const EdgeInsets.only(top: 5.0),
-                                      child: w,
+                                        ),
+                                        ColorPickerInput(
+                                          currentHsvColor.toColor(),
+                                          (color) => onColorChanged(color),
+                                          showColor: true,
+                                          style: GoogleFonts.openSans(
+                                            color: widget.textColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  const SizedBox(width: 12.0),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: _colorValueLabels(
+                                      currentHsvColor,
+                                      widget.allowOpacity,
+                                      widget.textColor,
+                                      widget.secondaryTextColor,
+                                    )
+                                        .map((w) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 5.0),
+                                              child: w,
+                                            ))
+                                        .toList(),
+                                  ),
                                 ],
-                              )
+                              ),
                             ],
                           ),
                         );
@@ -300,52 +322,44 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                     if (recentColors.isNotEmpty) ...[
                       const SizedBox(height: 16.0),
                       Text(
-                        "Recent Colors",
-                        style: TextStyle(
+                        widget.colorPickerTexts.recentColors,
+                        style: GoogleFonts.openSans(
                           color: widget.secondaryTextColor,
-                          fontFamily: 'Open Sans',
                           fontSize: 10,
                         ),
                       ),
                       const SizedBox(height: 7.0),
-                      ...[
-                        recentColors.reversed.take(7).toList(),
-                        if (recentColors.length > 7) ...[
-                          recentColors.reversed
-                              .toList()
-                              .sublist(7)
-                              .take(7)
-                              .toList()
-                        ]
-                      ]
-                          .map<Widget>(
-                            (recentColorsRow) => Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: recentColorsRow.map<Widget>((c) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 5.0),
-                                  child: InkWell(
-                                    onTap: () =>
-                                        setState(() => selectedColor = c),
-                                    child: Container(
-                                      width: 40.0,
-                                      height: 34.0,
-                                      decoration: BoxDecoration(
-                                        color: c,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.5),
-                                        ),
+                      Builder(builder: (context) {
+                        recentColorsWidget(double maxWidth) => Wrap(
+                              runSpacing: 10.0,
+                              spacing: (maxWidth - 40.0 * 7) / 6,
+                              children: recentColors.reversed
+                                  .take(14)
+                                  .map<Widget>((c) {
+                                return InkWell(
+                                  onTap: () =>
+                                      setState(() => selectedColor = c),
+                                  child: Container(
+                                    width: 40.0,
+                                    height: 34.0,
+                                    decoration: BoxDecoration(
+                                      color: c,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.5),
                                       ),
                                     ),
                                   ),
                                 );
                               }).toList(),
-                            ),
-                          )
-                          .toList(),
+                            );
+                        return widget.displayAsBottomSheet
+                            ? LayoutBuilder(
+                                builder: (context, constraints) =>
+                                    recentColorsWidget(constraints.maxWidth),
+                              )
+                            : recentColorsWidget(394);
+                      }),
                     ],
                     const SizedBox(height: 12.0),
                     Row(
@@ -376,9 +390,8 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                               ),
                             ),
                             child: Text(
-                              'Cancel',
-                              style: TextStyle(
-                                fontFamily: 'Open Sans',
+                              widget.colorPickerTexts.cancel,
+                              style: GoogleFonts.openSans(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                                 color: widget.textColor,
@@ -391,7 +404,7 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                         const SizedBox(width: 20.0),
                         SizedBox(
                           height: 40.0,
-                          width: 84.0,
+                          width: 86.0,
                           child: OutlinedButton(
                             onPressed: () {
                               if (widget.showRecentColors) {
@@ -424,9 +437,8 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                               ),
                             ),
                             child: Text(
-                              'Save',
-                              style: TextStyle(
-                                fontFamily: 'Open Sans',
+                              widget.colorPickerTexts.select,
+                              style: GoogleFonts.openSans(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                                 color: widget.primaryButtonTextColor,
@@ -464,33 +476,27 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 24.0),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      item,
-                      style: TextStyle(
-                        fontFamily: 'Open Sans',
-                        fontSize: 12,
-                        color: secondaryTextColor,
-                      ),
+              child: Column(
+                children: <Widget>[
+                  Text(
+                    item,
+                    style: GoogleFonts.openSans(
+                      fontSize: 12,
+                      color: secondaryTextColor,
                     ),
-                    const SizedBox(height: 19.0),
-                    Expanded(
-                      child: Text(
-                        _colorValue(hsvColor, colorType)[
-                            _colorTypes[colorType!]!.indexOf(item)],
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Open Sans',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
+                  ),
+                  const SizedBox(height: 14.0),
+                  Text(
+                    _colorValue(hsvColor, colorType)[
+                        _colorTypes[colorType!]!.indexOf(item)],
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.openSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: textColor,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

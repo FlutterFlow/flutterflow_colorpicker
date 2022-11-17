@@ -879,55 +879,54 @@ class _ColorPickerInputState extends State<ColorPickerInput> {
     }
     return Padding(
       padding: const EdgeInsets.only(top: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 32.0,
-            width: 168.0,
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFF262D34)),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              children: [
-                TextField(
-                  enabled: !widget.disable,
-                  controller: textEditingController,
-                  inputFormatters: [
-                    UpperCaseTextFormatter(),
-                    FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
-                  ],
-                  decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 5.0, 18.0),
-                      constraints: BoxConstraints(maxWidth: 100.0)),
-                  style: widget.style,
-                  onChanged: (value) {
-                    final Color? color = colorFromHex(value);
-                    if (color != null) {
-                      widget.onColorChanged(color);
-                      inputColor = color.value;
-                    }
-                  },
+      child: Container(
+        height: 32.0,
+        constraints: const BoxConstraints(maxWidth: 172.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF262D34)),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: TextField(
+                enabled: !widget.disable,
+                controller: textEditingController,
+                inputFormatters: [
+                  UpperCaseTextFormatter(),
+                  FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
+                ],
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.fromLTRB(14.0, 0.0, 5.0, 18.0),
+                  constraints: BoxConstraints(maxWidth: 120.0),
                 ),
-                const SizedBox(width: 30.0),
-                Container(
-                  width: 20.0,
-                  height: 20.0,
-                  decoration: BoxDecoration(
-                    color: widget.color,
-                    border: Border.all(
-                      width: 1.0,
-                      color: const Color(0xFF323B45),
-                    ),
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                ),
-              ],
+                style: widget.style,
+                onChanged: (value) {
+                  final Color? color = colorFromHex(value);
+                  if (color != null) {
+                    widget.onColorChanged(color);
+                    inputColor = color.value;
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+            Container(
+              width: 20.0,
+              height: 20.0,
+              decoration: BoxDecoration(
+                color: widget.color,
+                border: Border.all(
+                  width: 1.0,
+                  color: const Color(0xFF323B45),
+                ),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+            ),
+            const SizedBox(width: 14.0),
+          ],
+        ),
       ),
     );
   }
