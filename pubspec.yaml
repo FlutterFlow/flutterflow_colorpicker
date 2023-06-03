@@ -4,13 +4,13 @@ version: 0.0.1
 homepage: https://github.com/mchome/flutterflow_colorpicker
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts:
+  google_fonts: ^5.0.0
   shared_preferences:
 
 dev_dependencies:
