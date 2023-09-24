@@ -367,7 +367,6 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                       children: [
                         SizedBox(
                           height: 40.0,
-                          width: 96.0,
                           child: OutlinedButton(
                             onPressed: () => Navigator.of(context).pop(),
                             style: ButtonStyle(
@@ -404,7 +403,6 @@ class _FFColorPickerDialogState extends State<FFColorPickerDialog> {
                         const SizedBox(width: 20.0),
                         SizedBox(
                           height: 40.0,
-                          width: 86.0,
                           child: OutlinedButton(
                             onPressed: () {
                               if (widget.showRecentColors) {
