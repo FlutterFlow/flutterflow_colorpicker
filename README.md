@@ -13,6 +13,7 @@ Color pickedColor = Color(0xFF000000);
 final colorPickerResult = await showFFColorPicker(
   context,
   currentColor: pickedColor,
+  displayAsBottomSheet: true,
 );
 if (colorPickerResult != null) {
   setState(() => pickedColor = colorPickerResult);
