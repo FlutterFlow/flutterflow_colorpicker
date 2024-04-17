@@ -63,7 +63,7 @@ class HSVWithHueColorPainter extends CustomPainter {
     canvas.drawRect(
       rect,
       Paint()
-        ..blendMode = BlendMode.luminosity
+        ..blendMode = BlendMode.modulate
         ..shader = gradientH.createShader(rect),
     );
 
@@ -375,7 +375,7 @@ class RGBWithRedColorPainter extends CustomPainter {
       rect,
       Paint()
         ..shader = gradientV.createShader(rect)
-        ..blendMode = BlendMode.luminosity,
+        ..blendMode = BlendMode.modulate,
     );
 
     canvas.drawCircle(
@@ -423,7 +423,7 @@ class RGBWithGreenColorPainter extends CustomPainter {
       rect,
       Paint()
         ..shader = gradientV.createShader(rect)
-        ..blendMode = BlendMode.luminosity,
+        ..blendMode = BlendMode.modulate,
     );
 
     canvas.drawCircle(
@@ -471,7 +471,7 @@ class RGBWithBlueColorPainter extends CustomPainter {
       rect,
       Paint()
         ..shader = gradientV.createShader(rect)
-        ..blendMode = BlendMode.luminosity,
+        ..blendMode = BlendMode.modulate,
     );
 
     canvas.drawCircle(
