@@ -1,5 +1,5 @@
 name: flutterflow_colorpicker_example
-description: "A new Flutter project."
+description: "Flutter project demonstrating the flutterflow_colorpicker package."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -31,9 +31,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutterflow_colorpicker:
+    git:
+      url: https://github.com/FlutterFlow/flutterflow_colorpicker.git
+      ref: v0.0.1
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
