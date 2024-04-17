@@ -107,11 +107,9 @@ packages:
   flutterflow_colorpicker:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "v0.0.1"
-      resolved-ref: "50c9d40ad062ff7c958760fa439b40d7c4cb6926"
-      url: "https://github.com/FlutterFlow/flutterflow_colorpicker.git"
-    source: git
+      path: ".."
+      relative: true
+    source: path
     version: "0.0.1"
   google_fonts:
     dependency: transitive

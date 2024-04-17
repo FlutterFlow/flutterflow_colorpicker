@@ -32,9 +32,7 @@ dependencies:
     sdk: flutter
 
   flutterflow_colorpicker:
-    git:
-      url: https://github.com/FlutterFlow/flutterflow_colorpicker.git
-      ref: v0.0.1
+    path: ..
 
   cupertino_icons: ^1.0.6
 
