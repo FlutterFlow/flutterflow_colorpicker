@@ -1,6 +1,6 @@
 name: flutterflow_colorpicker
 description: HSV(HSB)/HSL/RGB/Material color picker for use in FlutterFlow projects.
-version: 0.0.1
+version: 0.0.1+1
 homepage: https://github.com/mchome/flutterflow_colorpicker
 
 environment:
